@@ -1,0 +1,116 @@
+<!--
+檔案路徑: /web/English_tutor/English_tutor.html
+
+這是一個簡單的英語家教聊天應用程式，使用 HTML、CSS 和 JavaScript 建立。
+
+結構:
+- 使用 Bootstrap 進行樣式設計。
+- 包含一個聊天框和一個輸入框，使用者可以在輸入框中輸入訊息並點擊 "Send" 按鈕發送訊息。
+
+樣式:
+- #chatbox: 設定聊天框的高度、邊框、滾動條和背景顏色。
+- .user-message: 設定使用者訊息的顏色為綠色。
+- .bot-message: 設定機器人訊息的顏色為藍色。
+
+JavaScript:
+- 使用 jQuery 來處理 DOM 操作。
+- 當使用者點擊 "Send" 按鈕時，將使用者輸入的訊息儲存到 messages 陣列中，並顯示在聊天框中。
+- 使用 fetch API 將使用者訊息和上下文傳送到伺服器端的 English_tutor.php。
+- 接收伺服器回傳的機器人回覆，並顯示在聊天框中。
+- 自動滾動聊天框到最底部以顯示最新訊息。
+-->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Associative Memory</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* 自訂樣式 */
+        #chatbox {
+            height: 400px;
+            border: 1px solid #ccc;
+            overflow-y: scroll;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        .user-message {
+            color: green; /* 使用者訊息顏色 */
+        }
+        .bot-message {
+            color: blue; /* 機器人訊息顏色 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h3 class="text-center">English Associative Memory</h3>
+        <div id="chatbox" class="mb-3"></div>
+        <div class="input-group">
+            <input type="text" id="userInput" class="form-control" placeholder="輸入你想學習英文單字">
+            <div class="input-group-append">
+                <button id="sendButton" class="btn btn-primary">Send</button>
+            </div>
+        </div>
+        <h5>Example:</h5>
+        <pre><code>
+            You: communicate
+            English tutor:
+            好啊，我們來記住「communicate」這個單字吧！
+            
+            **KK音標**：[kəˈmjunɪˌket]
+            
+            **詞性**：動詞
+            
+            **中文意涵**：溝通、交流
+            
+            為了幫助記憶這個詞，可以這樣聯想：
+            
+            1. **想像畫面**：想像你和朋友在一起，想要告訴對方一個好消息，比如說買了一台新手機。你們興奮地用手機視頻聊天，手舞足蹈地表達自己的喜悅。這個畫面就能讓你聯想到「communicate」的意思，就是「交流」和「溝通」的過程。
+            
+            2. **音調聯想**：將「communicate」的音調分成幾個部分，像是“come”+“uni”+“cate”。想像這些部分可以組合成“來一起”+“一”，再加上“切”（cate讓你想到了切蛋糕）。所以當你要跟朋友『come together』來慶祝某個特別的時刻時，就會用到「communicate」來互相分享這個喜悅。
+            
+            **例句**：
+            
+            1. We need to **communicate** our ideas clearly during the meeting.
+            
+            （我們需要在會議上清楚地溝通我們的想法。）
+            
+            2. It’s essential to **communicate** well with your team members to ensure success.
+            
+            （和你的團隊成員良好溝通是確保成功的關鍵。）
+            
+            這樣的聯想方式能讓你更容易記住「communicate」這個單字，是不是覺得有趣又實用呢？加油！登入生活中的每一刻，透過交流去記憶更多單字！
+        </code></pre>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script>
+        const messages = []; // 儲存對話上下文
+
+        document.getElementById('sendButton').onclick = function() {
+            const userInput = document.getElementById('userInput').value;
+            messages.push({ role: 'user', content: userInput }); // 儲存使用者訊息
+            document.getElementById('chatbox').innerHTML += `<div class="user-message"><strong>You:</strong> ${userInput}</div>`;
+            document.getElementById('userInput').value = '';
+
+            fetch('English_Associative_Memory.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userInput, context: messages }) // 傳送上下文
+            })
+            .then(response => response.json())
+            .then(data => {
+                const formattedReply = data.reply.split('\n').map(line => `<p>${line}</p>`).join('');
+                messages.push({ role: 'bot', content: formattedReply }); // 儲存機器人回覆
+                document.getElementById('chatbox').innerHTML += `<div class="bot-message"><strong>English tutor:</strong> ${formattedReply}</div>`;
+                document.getElementById('chatbox').scrollTop = chatbox.scrollHeight; // 滾動到最底部
+            });
+        };
+    </script>
+</body>
+</html>
